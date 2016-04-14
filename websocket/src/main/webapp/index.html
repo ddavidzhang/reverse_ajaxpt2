@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>HTTP Polling</title>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://jquery-json.googlecode.com/files/jquery.json-2.2.min.js"></script>
+    <script type="text/javascript">
+        jQuery(function($) {
+
+            if (!('WebSocket' in window)) {
+                alert('WebSocket not supported in your browser !');
+            }
+
+            function processEvents(events) {
+                if (events.length) {
+                    $('#logs').append('<span style="color: blue;">[server] ' + events.length + ' events</span><br/>');
+                } else {
+                    $('#logs').append('<span style="color: red;">[server] no event</span><br/>');
+                }
+                for (var i in events) {
+                    $('#logs').append('<span>[event] ' + events[i] + '</span><br/>');
+                }
+            }
+
+            var location = 'ws://127.0.0.1:8080/async';
+            console.log(location);
+            var ws = new WebSocket(location);
+
+            ws.onopen = function() {
+                $('#logs').append('<span style="color: green;">[client] WebSocket connection opened</span><br/>');
+            };
+
+            ws.onerror = function(e) {
+                $('#logs').append('<span style="color: green;">[client] WebSocket error</span><br/>');
+                console.log(e);
+            };
+
+            ws.onclose = function() {
+                $('#logs').append('<span style="color: green;">[client] WebSocket connection close</span><br/>');
+            };
+
+            ws.onmessage = function(evt) {
+                processEvents($.parseJSON(evt.data));
+            };
+
+            $('#send').click(function() {
+                ws.send($('#msg').val());
+                $('#msg').val('');
+            });
+
+            $('#close').click(function() {
+                ws.close();
+            });
+
+        });
+    </script>
+</head>
+<body>
+<h2>Echo Server</h2>
+<input id="msg" type="text"><button id="send">Send</button><br/>
+<button id="close">Close</button>
+<div id="logs" style="font-family: monospace;">
+</div>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>HTTP Polling</title>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://jquery-json.googlecode.com/files/jquery.json-2.2.min.js"></script>
+    <script type="text/javascript">
+        jQuery(function($) {
+
+            if (!('WebSocket' in window)) {
+                alert('WebSocket not supported in your browser !');
+            }
+
+            $('#http').click(function() {
+                $.ajax({
+                    url: 'async',
+                    dataType: 'html',
+                    success: function(data) {
+                        $('#logs').append("<br/>1. " + data + '<br/>');
+                    }
+                });
+            });
+
+            var ws = new WebSocket('ws://127.0.0.1:8080/ws');
+            ws.onmessage = function(evt) {
+                $('#logs').append("<br/>2. " + evt.data + '<br/>');
+            };
+            $('#ws').click(function() {
+                ws.send("");
+            });
+
+            var wsfixed = new WebSocket('ws://127.0.0.1:8080/ws-fixed');
+            wsfixed.onmessage = function(evt) {
+                $('#logs').append("<br/>3. " + evt.data + '<br/>');
+            };
+            $('#wsfixed').click(function() {
+                wsfixed.send("");
+            });
+
+        });
+    </script>
+</head>
+<body>
+<button id="http">1. Send data through Ajax (in request scope)</button>
+<br/>
+<button id="ws">2. Send data through WebSocket (no request scope)</button>
+<br/>
+<button id="wsfixed">3. Send data through the fixed WebSocket (request scope is simulated)</button>
+<div id="logs" style="font-family: monospace;">
+</div>
+</body>
+</html>
